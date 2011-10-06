@@ -19,6 +19,12 @@ public class TestLambda {
 
     @Test
     public void testLambda() {
+        Function2<Integer, Integer, Integer> f = Lambda(Integer.class, var(Integer.class, "x"), var(Integer.class, "y")).build("x+y");
+        assertThat(f.apply(1, 2), is(3));
+    }
+
+    @Test
+    public void testLambdaWithBind() {
         Function2<Integer, Integer, Integer> f = Lambda(Integer.class, var(Integer.class, "x"), var(Integer.class, "y")).build("x+y+z", val("z", 12));
         assertThat(f.apply(1, 2), is(15));
     }
@@ -43,71 +49,5 @@ public class TestLambda {
 
     }
 
-    private <V> FList<V> buildList(Class<V> itemType, V ... values) {
-        FList<V> aList = new FList<V>(itemType);
-        aList.addAll(Arrays.asList(values));
-        return aList;
-    }
-
-    @Test
-    public void testMapOnList() {
-        FList<Integer> aList = buildList(Integer.class,1,2,3);
-        FList<Integer> bList = aList.map(Integer.class, "a*a");
-        assertThat(bList, hasItems(1, 4, 9));
-    }
-
-    @Test
-    public void testMapOnListToStrings() {
-        FList<Integer> aList = buildList(Integer.class,1,2,3);
-        FList<String> bList = aList.map(String.class, "Integer.toString(a)");
-        assertThat(bList, hasItems("1", "2", "3"));
-    }
-
-    @Test
-    public void testMapOnListWithMapTo() {
-        FList<Integer> aList = buildList(Integer.class,1,2,3);
-        FList<Integer> bList = aList.mapTo(Integer.class).with("a*a+b", val(12));
-        assertThat(bList, hasItems(13, 16, 21));
-    }
-
-    static class FList<T> extends ArrayList<T> {
-
-        private Class<T> itemsType;
-
-        public FList(Class<T> itemsType) {
-            this.itemsType = itemsType;
-        }
-
-        public <R> FList<R> map(Class<R> retType, Function1<R, T> mapper) {
-            FList<R> newList = new FList<R>(mapper.retType());
-            for (T t: this)
-                newList.add(mapper.apply(t));
-            return newList;
-        }
-
-        public <R> FList<R> map(Class<R> retType, String code) {
-            Function1<R, T> mapper = Lambda(retType, var(itemsType)).build(code);
-            return map(retType, mapper);
-        }
-
-        public <R> PreparedMapper<R, T> mapTo(Class<R> retType) {
-            return new PreparedMapper<R, T>(this, retType);
-        }
-
-    }
-
-    public static class PreparedMapper<R, T> {
-        private FList<T> fList;
-        private Class<R> retType;
-
-        public PreparedMapper(FList<T> fList, Class<R> retType) {
-            this.fList = fList;
-            this.retType = retType;
-        }
-
-        public FList<R> with(String code, Val ... vals) {
-            return fList.map(retType, Lambda(retType, var(fList.itemsType)).build(code, vals));
-        }
-    }
 
 }
