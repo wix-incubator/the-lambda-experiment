@@ -45,7 +45,10 @@ yet.
 
 + Multiple line expressions. The Lambda Experiment assumes that the string expressions passed to the build method
   are single line expressions, that are always wrapped with "return {expression};".
-+ Functions with over 3 parameters. It is trivial to add those - not interesting for an experiment scope.
++ Functions with over 3 parameters. It is trivial to add those - not interesting for experiment scope.
 + Curry operations - transform a Function3 into Function2 by providing a variable value. This seems trivial and as such,
   was not implemented.
++ Functional Collections - the project does not implement another set of functional collection libraries for Java. We think
+  there are enough collection libraries as it is - our preferred approach is for one of those libraries to take the ideas of
+  The Lambda Project and incorporate them.
 
