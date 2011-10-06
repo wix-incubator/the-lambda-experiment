@@ -2,6 +2,7 @@ package org.wixpress.hoopoe.lambda;
 
 import javassist.*;
 
+import java.lang.reflect.Constructor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -19,6 +20,7 @@ class LambdaClassGenerator<F> {
     String constructorCode;
     Class<?> functionInterface;
     Class<F> lambdaClass;
+    Constructor<F> lambdaConstructor;
     private LambdaSignature<F> lambdaSignature;
 
     public LambdaClassGenerator(LambdaSignature<F> lambdaSignature) {
@@ -57,9 +59,20 @@ class LambdaClassGenerator<F> {
 
             //noinspection unchecked
             lambdaClass = (Class<F>)ctClass.toClass();
+            lambdaConstructor = lambdaClass.getConstructor(getValTypes(vals));
+            lambdaConstructor.setAccessible(true);
         } catch (CannotCompileException e) {
             throw new LambdaException("failed creating Lambda - \n" + toString(), e);
+        } catch (NoSuchMethodException e) {
+            throw new LambdaException("failed creating Lambda - \n" + toString(), e);
         }
+    }
+
+    private Class<?>[] getValTypes(Val[] vals) {
+        Class<?>[] valTypes = new Class<?>[vals.length];
+        for (int i=0; i < vals.length; i++)
+            valTypes[i] = vals[i].boxedType();
+        return valTypes;
     }
 
     private CtClass toCtClass(final Class inputClass) {

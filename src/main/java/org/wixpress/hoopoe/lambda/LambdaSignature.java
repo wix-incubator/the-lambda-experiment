@@ -1,6 +1,5 @@
 package org.wixpress.hoopoe.lambda;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,32 +27,24 @@ public class LambdaSignature<F> {
         for (Val val: vals) {
             val.setDefaultName(nextBindDefaultName++);
         }
-        LambdaClassGenerator lambdaGen = generateClass(code, vals);
+        LambdaClassGenerator<F> lambdaGen = generateClass(code, vals);
         try {
-            Class<?>[] valTypes = new Class<?>[vals.length];
             Object[] valValues = new Object[vals.length];
             for (int i=0; i < vals.length; i++) {
                 Val val = vals[i];
-                valTypes[i] = val.boxedType();
                 valValues[i] = val.getValue();
             }
-
-            @SuppressWarnings({"unchecked"})
-            Constructor<F> constructor = lambdaGen.lambdaClass.getConstructor(valTypes);
-            return constructor.newInstance(valValues);
-
+            return lambdaGen.lambdaConstructor.newInstance(valValues);
         } catch (InstantiationException e) {
             throw new LambdaException("failed creating Lambda instance - \n" + lambdaGen.toString(), e);
         } catch (IllegalAccessException e) {
-            throw new LambdaException("failed creating Lambda instance - \n" + lambdaGen.toString(), e);
-        } catch (NoSuchMethodException e) {
             throw new LambdaException("failed creating Lambda instance - \n" + lambdaGen.toString(), e);
         } catch (InvocationTargetException e) {
             throw new LambdaException("failed creating Lambda instance - \n" + lambdaGen.toString(), e);
         }
     }
 
-    private LambdaClassGenerator generateClass(String code, Val[] vals) {
+    private LambdaClassGenerator<F> generateClass(String code, Val[] vals) {
         LambdaClassKey key = new LambdaClassKey(retType, vars, vals, code);
         if (!classCache.containsKey(key)) {
             synchronized (classCache) {
@@ -65,6 +56,7 @@ public class LambdaSignature<F> {
                 }
             }
         }
+        //noinspection unchecked
         return classCache.get(key);
     }
 
