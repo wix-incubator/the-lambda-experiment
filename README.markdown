@@ -6,6 +6,8 @@ and some projects trying to do things like Lambdas for Java (e.g. [LambdaJ](http
 The Lambda Experiment tries to implement Lambdas for the Java programming language, within the constraints of Java 6 & 7.
 It is built as a prof of concept and as such, some features were not completed.
 
+Please use the [Issues](https://github.com/Wixpress/the-lambda-experiment/issues) system for any questions, ideas or feedback.
+
 ## What The Lambda Experiment does
 
 The Lambda Experiment project enables writing functional style code in Java. The simple ```list.map``` operation can be done as
