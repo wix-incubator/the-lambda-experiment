@@ -36,4 +36,16 @@ private <T> Comparator<T> Comparator(Class<T> ofType, String code) {
 Collections.sort(aList, Comparator(Integer.class, "(a>b?1:(a<b?-1:0))"));
 ```
 
+## What the Lambda Experiment does not do
+
+The Lambda Experiment was built as a prof of concept and as such, we did not invest in proving all the features required
+by a production library. It is important to note that the Lambda Experiment is built with the quality of production code
+in mind (including performance and testing support). Having said that, the following is the list of features not implemented
+yet.
+
++ Multiple line expressions. The Lambda Experiment assumes that the string expressions passed to the build method
+  are single line expressions, that are always wrapped with "return {expression};".
++ Functions with over 3 parameters. It is trivial to add those - not interesting for an experiment scope.
++ Curry operations - transform a Function3 into Function2 by providing a variable value. This seems trivial and as such,
+  was not implemented.
 
