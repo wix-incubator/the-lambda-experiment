@@ -8,7 +8,19 @@ It is built as a prof of concept and as such, some features were not completed.
 
 ## What The Lambda Experiment does
 
-The Lambda Experiment project enables writing functional style code in Java. We have implemented three examples of the List map operation
+The Lambda Experiment project enables writing functional style code in Java. The simple list.map operation can be done as
+
+```java
+aList.map(Integer.class, "a*a");
+```
+
+Which is equivalent to the Scala code
+
+```scala
+aList.map(_*_)
+```
+
+We have implemented three examples of the List map operation. All three perform the same operation - returns a new list of integers with the square of each element of the original list.
 
 ```java
 aList.map(Integer.class, "a*a");
@@ -16,12 +28,21 @@ aList.mapTo(Integer.class).with("a*a");
 aList.map(Lambda(Integer.class, var(Integer.class)).build("a*a"));
 ```
 
-```scala
-aList.map(_*_)
+The Lambda Experiment also supports binding variables from the enclosing scope such as
+
+```java
+int x = 6;
+aList.map(Integer.class, "a*a+b", val(x));
+aList.map(Integer.class, "a*a+x", val("x", x));
 ```
 
+Which is equivalent to the Scala code
 
-All three perform the same operation - returns a new list of integers with the square of each element of the original list.
+```scala
+val x = 6
+aList.map(_*_+x)
+```
+
 
 In addition, The Lambda Experiment supports SAM (Single Abstract Method) Interfaces, which enables reusing existing SAM interfaces
 
