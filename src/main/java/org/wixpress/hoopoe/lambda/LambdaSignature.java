@@ -14,7 +14,6 @@ public class LambdaSignature<F> {
     RetType retType;
     Var<?>[] vars;
     private char nextDefaultName = 'a';
-
     private static final Map<LambdaClassKey, LambdaClassGenerator> classCache = new HashMap<LambdaClassKey, LambdaClassGenerator>();
 
     public LambdaSignature(Class<?> retType, Var<?>... vars) {
