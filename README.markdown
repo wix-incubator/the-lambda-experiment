@@ -8,7 +8,7 @@ It is built as a prof of concept and as such, some features were not completed.
 
 ## What The Lambda Experiment does
 
-The Lambda Experiment project enables writing functional style code in Java. The simple list.map operation can be done as
+The Lambda Experiment project enables writing functional style code in Java. The simple ```list.map``` operation can be done as
 
 ```java
 aList.map(Integer.class, "a*a");
@@ -121,6 +121,7 @@ The ```SAMSignature<SAM>``` class is a factory class, that given a code and a se
 Lambda class using the LambdaSignature<F> (where the actual signature is read from the SAM interface) and will wrap the
 resulting class with a JDK Proxy implementing the SAM interface.
 
+The collection map methods above are simple wrappers around the Lambdas API.
 
 ## What the Lambda Experiment does not do
 
@@ -130,9 +131,9 @@ in mind (including performance and testing support). Having said that, the follo
 yet.
 
 + Multiple line expressions. The Lambda Experiment assumes that the string expressions passed to the build method
-  are single line expressions, that are always wrapped with "return {expression};".
+  are single line expressions, that are always wrapped with ```return {expression};```.
 + Functions with over 3 parameters. It is trivial to add those - not interesting for experiment scope.
-+ Curry operations - transform a Function3 into Function2 by providing a variable value. This seems trivial and as such,
++ Curry operations - transform a ```Function3``` into ```Function2``` by providing a variable value. This seems trivial and as such,
   was not implemented.
 + Functional Collections - the project does not implement another set of functional collection libraries for Java. We think
   there are enough collection libraries as it is - our preferred approach is for one of those libraries to take the ideas of
