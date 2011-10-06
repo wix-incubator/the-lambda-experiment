@@ -46,7 +46,7 @@ aList.map(_*_+x)
 
 
 In addition, The Lambda Experiment supports SAM (Single Abstract Method) Interfaces, which enables reusing existing Java interfaces
-that take SAM parameters as inputs. A Good example is the Collections.sort operation which accepts a Comparator<?> SAM.
+that take SAM parameters as inputs. A Good example is the Collections.sort operation which accepts a ```Comparator<?>``` SAM.
 
 ```java
 Collections.sort(aList, Lambda(Comparator.class, Float.class).build("(a>b?1:(a<b?-1:0))"));
@@ -65,7 +65,7 @@ private <T> Comparator<T> Comparator(Class<T> ofType, String code) {
 Collections.sort(aList, Comparator(Integer.class, "(a>b?1:(a<b?-1:0))"));
 ```
 
-## How is the Lambda Experiment implemented
+## How does it work
 
 The core of the Lambda Experiment is the Lambdas class which exposes the static methods for Lambda creation.
 It offers two styles of Lambda methods - for the creation of SAM Lambdas and the creation of FuctionN Lambdas.
@@ -85,7 +85,7 @@ public static <SAM> SAMSignature<SAM> Lambda(Class<SAM> samType)
 public static <SAM> SAMSignature<SAM> Lambda(Class<SAM> samType, Class<?> ... genericTypes)
 ```
 
-The LambdaSignature<F> class is a factory class that, given a code and a set of variable bindings, will generate a class
+The ```LambdaSignature<F>``` class is a factory class that, given a code and a set of variable bindings, will generate a class
 implementing the F interface. The actual code generation is done using javassist.
 
 For example, building the following Lambda
@@ -117,7 +117,7 @@ class Lambda$$1340129336 implements org.wixpress.hoopoe.lambda.Function2 {
 }
 ```
 
-The SAMSignature<SAM> class is a factory class, that given a code and a set of variable bindings, will generate a
+The ```SAMSignature<SAM>``` class is a factory class, that given a code and a set of variable bindings, will generate a
 Lambda class using the LambdaSignature<F> (where the actual signature is read from the SAM interface) and will wrap the
 resulting class with a JDK Proxy implementing the SAM interface.
 
