@@ -64,6 +64,16 @@ public class TestLambda {
             public String apply(Integer a, Integer b) {
                 return Integer.toString(a + b + r);
             }
+
+            @Override
+            public String retType() {
+                return null;  //To change body of implemented methods use File | Settings | File Templates.
+            }
+
+            @Override
+            public Class<?>[] varTypes() {
+                return new Class<?>[0];  //To change body of implemented methods use File | Settings | File Templates.
+            }
         };
         System.out.printf("Anonymous class initial creation  - %,d nSec\n", System.nanoTime() - start);
 
@@ -73,6 +83,16 @@ public class TestLambda {
                 @Override
                 public String apply(Integer a, Integer b) {
                     return Integer.toString(a + b + r);
+                }
+
+                @Override
+                public String retType() {
+                    return null;  //To change body of implemented methods use File | Settings | File Templates.
+                }
+
+                @Override
+                public Class<?>[] varTypes() {
+                    return new Class<?>[0];  //To change body of implemented methods use File | Settings | File Templates.
                 }
             };
         }
@@ -100,49 +120,49 @@ public class TestLambda {
     }
 
 
-    private <V> FunctionalList<V> buildList(Class<V> itemType, V ... values) {
-        FunctionalList<V> aList = new FunctionalList<V>(itemType);
+    private <V> FList<V> buildList(Class<V> itemType, V ... values) {
+        FList<V> aList = new FList<V>(itemType);
         aList.addAll(Arrays.asList(values));
         return aList;
     }
 
     @Test
     public void testMapOnList() {
-        FunctionalList<Integer> aList = buildList(Integer.class,1,2,3);
-        FunctionalList<Integer> bList = aList.map(Integer.class, "a*a");
+        FList<Integer> aList = buildList(Integer.class,1,2,3);
+        FList<Integer> bList = aList.map(Integer.class, "a*a");
         assertThat(bList, hasItems(1, 4, 9));
     }
 
     @Test
     public void testMapOnListToStrings() {
-        FunctionalList<Integer> aList = buildList(Integer.class,1,2,3);
-        FunctionalList<String> bList = aList.map(String.class, "Integer.toString(a)");
+        FList<Integer> aList = buildList(Integer.class,1,2,3);
+        FList<String> bList = aList.map(String.class, "Integer.toString(a)");
         assertThat(bList, hasItems("1", "2", "3"));
     }
 
     @Test
     public void testMapOnListWithMapTo() {
-        FunctionalList<Integer> aList = buildList(Integer.class,1,2,3);
-        FunctionalList<Integer> bList = aList.mapTo(Integer.class).with("a*a+b", val(12));
+        FList<Integer> aList = buildList(Integer.class,1,2,3);
+        FList<Integer> bList = aList.mapTo(Integer.class).with("a*a+b", val(12));
         assertThat(bList, hasItems(13, 16, 21));
     }
 
-    static class FunctionalList<T> extends ArrayList<T> {
+    static class FList<T> extends ArrayList<T> {
 
         private Class<T> itemsType;
 
-        public FunctionalList(Class<T> itemsType) {
+        public FList(Class<T> itemsType) {
             this.itemsType = itemsType;
         }
 
-        public <R> FunctionalList<R> map(Class<R> retType, Function1<R, T> mapper) {
-            FunctionalList<R> newList = new FunctionalList<R>(retType);
+        public <R> FList<R> map(Class<R> retType, Function1<R, T> mapper) {
+            FList<R> newList = new FList<R>(retType);
             for (T t: this)
                 newList.add(mapper.apply(t));
             return newList;
         }
 
-        public <R> FunctionalList<R> map(Class<R> retType, String code) {
+        public <R> FList<R> map(Class<R> retType, String code) {
             Function1<R, T> mapper = Lambda(retType, var(itemsType)).build(code);
             return map(retType, mapper);
         }
@@ -154,16 +174,16 @@ public class TestLambda {
     }
 
     public static class PreparedMapper<R, T> {
-        private FunctionalList<T> functionalList;
+        private FList<T> fList;
         private Class<R> retType;
 
-        public PreparedMapper(FunctionalList<T> functionalList, Class<R> retType) {
-            this.functionalList = functionalList;
+        public PreparedMapper(FList<T> fList, Class<R> retType) {
+            this.fList = fList;
             this.retType = retType;
         }
 
-        public FunctionalList<R> with(String code, Val ... vals) {
-            return functionalList.map(retType, Lambda(retType, var(functionalList.itemsType)).build(code, vals));
+        public FList<R> with(String code, Val ... vals) {
+            return fList.map(retType, Lambda(retType, var(fList.itemsType)).build(code, vals));
         }
     }
 

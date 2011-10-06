@@ -12,6 +12,8 @@ class LambdaClassGenerator<F> {
     private static AtomicInteger lambdaCounter = new AtomicInteger();
     String invokeCode;
     String invokeInternalCode;
+    String retTypeCode;
+    String varTypesCode;
     String[] fieldsCode;
     String lambdaName;
     String constructorCode;
@@ -40,6 +42,14 @@ class LambdaClassGenerator<F> {
 
             ctClass.addMethod(CtNewMethod.make(
                     invokeCode,
+                    ctClass));
+
+            ctClass.addMethod(CtNewMethod.make(
+                    retTypeCode,
+                    ctClass));
+
+            ctClass.addMethod(CtNewMethod.make(
+                    varTypesCode,
                     ctClass));
 
             if (constructorCode != null)
@@ -71,6 +81,8 @@ class LambdaClassGenerator<F> {
     private void generateClassCode(String code, Val[] vals) {
         this.invokeCode = writeInvokeCode();
         this.invokeInternalCode = writeInvokeInternalCode(code);
+        this.retTypeCode = writeRetTypeCode();
+        this.varTypesCode = writeVarTypesCode();
         this.fieldsCode = writeVariablesCode(vals);
         this.lambdaName = generateLambdaName();
         this.constructorCode = writeConstructorCode(lambdaName, vals);
@@ -100,6 +112,26 @@ class LambdaClassGenerator<F> {
         for (int i=0; i < vals.length; i++)
             valsCode[i] = String.format("%s %s;", vals[i].primitiveType(), vals[i].getName());
         return valsCode;
+    }
+
+    private String writeVarTypesCode() {
+        StringBuilder methodCode = new StringBuilder();
+        methodCode.append("\tpublic Class[] varTypes() {\n")
+                .append("\t\treturn new Class[] {");
+        for (int i=0; i < lambdaSignature.vars.length; i++) {
+            methodCode.append(lambdaSignature.vars[i].boxedType().getName()).append(".class").append((i<lambdaSignature.vars.length-1)?", ":"");
+        }
+        methodCode.append("};\n")
+                .append("\t}");
+        return methodCode.toString();
+    }
+
+    private String writeRetTypeCode() {
+        return new StringBuilder()
+                .append("\tpublic Class retType() {\n")
+                .append("\t\treturn ").append(lambdaSignature.retType.boxedType().getName()).append(".class;\n")
+                .append("\t}")
+                .toString();
     }
 
     private String writeInvokeCode() {
@@ -150,10 +182,12 @@ class LambdaClassGenerator<F> {
     public String toString() {
         StringBuilder sb = new StringBuilder().append("class ").append(lambdaName).append(" implements ").append(functionInterface.getName()).append(" {\n");
         for (String fieldCode: fieldsCode)
-            sb.append("\t").append(fieldCode).append(";\n");
+            sb.append("\t").append(fieldCode).append("\n");
         sb.append(constructorCode).append("\n");
         sb.append(invokeCode).append("\n");
         sb.append(invokeInternalCode).append("\n");
+        sb.append(retTypeCode).append("\n");
+        sb.append(varTypesCode).append("\n");
         sb.append("}");
         return sb.toString();
     }
