@@ -16,12 +16,18 @@ aList.mapTo(Integer.class).with("a*a");
 aList.map(Lambda(Integer.class, var(Integer.class)).build("a*a"));
 ```
 
+```scala
+aList.map(_*_)
+```
+
+
 All three perform the same operation - returns a new list of integers with the square of each element of the original list.
 
 In addition, The Lambda Experiment supports SAM (Single Abstract Method) Interfaces, which enables reusing existing SAM interfaces
 
 ```java
-Collections.sort(aList, Lambda(Comparator.class, Integer.class).build("(a>b?1:(a<b?-1:0))"));
+Collections.sort(aList, Lambda(Comparator.class, Float.class).build("(a>b?1:(a<b?-1:0))"));
+Collections.sort(aList, Lambda(Comparator.class, Integer.class).build("a-b"));
 ```
 
 or with a simple factory
@@ -35,6 +41,9 @@ private <T> Comparator<T> Comparator(Class<T> ofType, String code) {
 
 Collections.sort(aList, Comparator(Integer.class, "(a>b?1:(a<b?-1:0))"));
 ```
+
+
+
 
 ## What the Lambda Experiment does not do
 
