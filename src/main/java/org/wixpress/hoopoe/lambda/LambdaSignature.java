@@ -1,9 +1,9 @@
 package org.wixpress.hoopoe.lambda;
 
-import javassist.*;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Yoav
@@ -15,23 +15,13 @@ public class LambdaSignature<F> {
     Var<?>[] vars;
     private char nextDefaultName = 'a';
 
+    private static final Map<LambdaClassKey, LambdaClassGenerator> classCache = new HashMap<LambdaClassKey, LambdaClassGenerator>();
 
     public LambdaSignature(Class<?> retType, Var<?>... vars) {
-        this(new RetType(retType), vars);
+        this.vars = vars;
+        this.retType = new RetType(retType);
         for (Var var: vars)
             var.setDefaultName(nextDefaultName++);
-    }
-
-    private LambdaSignature(RetType retType, Var<?>[] vars) {
-        this.vars = vars;
-        this.retType = retType;
-    }
-
-    private Val[] concat(Val[] a, Val b) {
-        Val[] c = new Val[a.length+1];
-        System.arraycopy(a, 0, c, 0, a.length);
-        c[c.length-1] = b;
-        return c;
     }
 
     public F build(String code, Val ... vals) {
@@ -39,7 +29,7 @@ public class LambdaSignature<F> {
         for (Val val: vals) {
             val.setDefaultName(nextBindDefaultName++);
         }
-        LambdaCodeGenerator lambdaGen = generateClass(code, vals);
+        LambdaClassGenerator lambdaGen = generateClass(code, vals);
         try {
             Class<?>[] valTypes = new Class<?>[vals.length];
             Object[] valValues = new Object[vals.length];
@@ -49,7 +39,7 @@ public class LambdaSignature<F> {
                 valValues[i] = val.getValue();
             }
 
-//            return lambdaGen.lambdaClass.newInstance();
+            @SuppressWarnings({"unchecked"})
             Constructor<F> constructor = lambdaGen.lambdaClass.getConstructor(valTypes);
             return constructor.newInstance(valValues);
 
@@ -64,51 +54,10 @@ public class LambdaSignature<F> {
         }
     }
 
-    private LambdaCodeGenerator generateClass(String code, Val[] vals) {
-        LambdaCodeGenerator<F> lambdaGen = new LambdaCodeGenerator<F>(this);
-        lambdaGen.generateClassCode(code, vals);
-        try {
-            ClassPool pool = ClassPool.getDefault();
-            pool.insertClassPath(new ClassClassPath(this.getClass()));
-            CtClass ctClass = pool.makeClass(lambdaGen.lambdaName);
-            ctClass.addInterface(toCtClass(lambdaGen.functionInterface));
-
-            for (String fieldCode: lambdaGen.fieldsCode)
-                ctClass.addField(CtField.make(fieldCode, ctClass));
-
-            ctClass.addMethod(CtNewMethod.make(
-                    lambdaGen.invokeInternalCode,
-                    ctClass));
-
-            ctClass.addMethod(CtNewMethod.make(
-                    lambdaGen.invokeCode,
-                    ctClass));
-
-            if (lambdaGen.constructorCode != null)
-                ctClass.addConstructor(CtNewConstructor.make(lambdaGen.constructorCode, ctClass));
-
-            //noinspection unchecked
-            lambdaGen.lambdaClass = (Class<F>)ctClass.toClass();
-            return lambdaGen;
-        } catch (CannotCompileException e) {
-            throw new LambdaException("failed creating Lambda - \n" + lambdaGen.toString(), e);
-        }
-    }
-
-    private CtClass toCtClass(final Class inputClass) {
-        try {
-            ClassPool pool = ClassPool.getDefault();
-            return pool.get(toClassName(inputClass));
-        } catch (NotFoundException ex) {
-            throw new LambdaException("Failed getting CtClass for [%s] as it is not found", inputClass, ex);
-        }
-    }
-
-    private String toClassName(final Class inputClass) {
-        if (inputClass.isArray())
-            return toClassName(inputClass.getComponentType()) + "[]";
-
-        return inputClass.getName();
+    private LambdaClassGenerator generateClass(String code, Val[] vals) {
+        LambdaClassGenerator<F> lambdaGen = new LambdaClassGenerator<F>(this);
+        lambdaGen.generateClass(code, vals);
+        return lambdaGen;
     }
 
 }

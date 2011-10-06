@@ -1,12 +1,14 @@
 package org.wixpress.hoopoe.lambda;
 
+import javassist.*;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
 * @author Yoav
 * @since 10/6/11
 */
-class LambdaCodeGenerator<F> {
+class LambdaClassGenerator<F> {
     private static AtomicInteger lambdaCounter = new AtomicInteger();
     String invokeCode;
     String invokeInternalCode;
@@ -17,22 +19,56 @@ class LambdaCodeGenerator<F> {
     Class<F> lambdaClass;
     private LambdaSignature<F> lambdaSignature;
 
-    public LambdaCodeGenerator(LambdaSignature<F> lambdaSignature) {
+    public LambdaClassGenerator(LambdaSignature<F> lambdaSignature) {
         this.lambdaSignature = lambdaSignature;
     }
 
-    public String toString() {
-        StringBuilder sb = new StringBuilder().append("class ").append(lambdaName).append(" implements ").append(functionInterface.getName()).append(" {\n");
-        for (String fieldCode: fieldsCode)
-            sb.append("\t").append(fieldCode).append(";\n");
-        sb.append(constructorCode).append("\n");
-        sb.append(invokeCode).append("\n");
-        sb.append(invokeInternalCode).append("\n");
-        sb.append("}");
-        return sb.toString();
+    public void generateClass(String code, Val[] vals) {
+        generateClassCode(code, vals);
+        try {
+            ClassPool pool = ClassPool.getDefault();
+            pool.insertClassPath(new ClassClassPath(this.getClass()));
+            CtClass ctClass = pool.makeClass(lambdaName);
+            ctClass.addInterface(toCtClass(functionInterface));
+
+            for (String fieldCode: fieldsCode)
+                ctClass.addField(CtField.make(fieldCode, ctClass));
+
+            ctClass.addMethod(CtNewMethod.make(
+                    invokeInternalCode,
+                    ctClass));
+
+            ctClass.addMethod(CtNewMethod.make(
+                    invokeCode,
+                    ctClass));
+
+            if (constructorCode != null)
+                ctClass.addConstructor(CtNewConstructor.make(constructorCode, ctClass));
+
+            //noinspection unchecked
+            lambdaClass = (Class<F>)ctClass.toClass();
+        } catch (CannotCompileException e) {
+            throw new LambdaException("failed creating Lambda - \n" + toString(), e);
+        }
     }
 
-    public void generateClassCode(String code, Val[] vals) {
+    private CtClass toCtClass(final Class inputClass) {
+        try {
+            ClassPool pool = ClassPool.getDefault();
+            return pool.get(toClassName(inputClass));
+        } catch (NotFoundException ex) {
+            throw new LambdaException("Failed getting CtClass for [%s] as it is not found", inputClass, ex);
+        }
+    }
+
+    private String toClassName(final Class inputClass) {
+        if (inputClass.isArray())
+            return toClassName(inputClass.getComponentType()) + "[]";
+
+        return inputClass.getName();
+    }
+
+    private void generateClassCode(String code, Val[] vals) {
         this.invokeCode = writeInvokeCode();
         this.invokeInternalCode = writeInvokeInternalCode(code);
         this.fieldsCode = writeVariablesCode(vals);
@@ -109,6 +145,17 @@ class LambdaCodeGenerator<F> {
             case 3: return Function3.class;
             default: throw new LambdaException("unsupported number of lambda parameters [%d]", lambdaSignature.vars.length);
         }
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder().append("class ").append(lambdaName).append(" implements ").append(functionInterface.getName()).append(" {\n");
+        for (String fieldCode: fieldsCode)
+            sb.append("\t").append(fieldCode).append(";\n");
+        sb.append(constructorCode).append("\n");
+        sb.append(invokeCode).append("\n");
+        sb.append(invokeInternalCode).append("\n");
+        sb.append("}");
+        return sb.toString();
     }
 
 

@@ -26,4 +26,5 @@ public class Var<T> extends FuncVariable {
         if ("".equals(name))
             name = String.valueOf(c);
     }
+
 }
