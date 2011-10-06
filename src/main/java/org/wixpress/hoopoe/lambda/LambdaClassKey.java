@@ -58,4 +58,9 @@ public class LambdaClassKey {
     public int hashCode() {
         return hash;
     }
+
+    public String uniqueName() {
+        return (hash>-1)?Integer.toString(hash):"1"+Integer.toString(hash).substring(1);
+    }
+
 }

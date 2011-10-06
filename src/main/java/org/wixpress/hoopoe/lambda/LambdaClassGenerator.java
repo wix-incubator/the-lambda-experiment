@@ -25,8 +25,8 @@ class LambdaClassGenerator<F> {
         this.lambdaSignature = lambdaSignature;
     }
 
-    public void generateClass(String code, Val[] vals) {
-        generateClassCode(code, vals);
+    public void generateClass(String code, Val[] vals, LambdaClassKey key) {
+        generateClassCode(code, vals, key);
         try {
             ClassPool pool = ClassPool.getDefault();
             pool.insertClassPath(new ClassClassPath(this.getClass()));
@@ -78,13 +78,13 @@ class LambdaClassGenerator<F> {
         return inputClass.getName();
     }
 
-    private void generateClassCode(String code, Val[] vals) {
+    private void generateClassCode(String code, Val[] vals, LambdaClassKey key) {
         this.invokeCode = writeInvokeCode();
         this.invokeInternalCode = writeInvokeInternalCode(code);
         this.retTypeCode = writeRetTypeCode();
         this.varTypesCode = writeVarTypesCode();
         this.fieldsCode = writeVariablesCode(vals);
-        this.lambdaName = generateLambdaName();
+        this.lambdaName = generateLambdaName(key);
         this.constructorCode = writeConstructorCode(lambdaName, vals);
         this.functionInterface = getFunctionInterface();
     }
@@ -119,7 +119,7 @@ class LambdaClassGenerator<F> {
         methodCode.append("\tpublic Class[] varTypes() {\n")
                 .append("\t\treturn new Class[] {");
         for (int i=0; i < lambdaSignature.vars.length; i++) {
-            methodCode.append(lambdaSignature.vars[i].boxedType().getName()).append(".class").append((i<lambdaSignature.vars.length-1)?", ":"");
+            methodCode.append(lambdaSignature.vars[i].boxedType().getName()).append(".class").append((i < lambdaSignature.vars.length - 1) ? ", " : "");
         }
         methodCode.append("};\n")
                 .append("\t}");
@@ -166,8 +166,8 @@ class LambdaClassGenerator<F> {
         return sb.toString();
     }
 
-    private String generateLambdaName() {
-        return String.format("Lambda$$%d", lambdaCounter.getAndIncrement());
+    private String generateLambdaName(LambdaClassKey key) {
+        return "Lambda$$" + key.uniqueName();
     }
 
     private Class getFunctionInterface() {

@@ -59,7 +59,7 @@ public class LambdaSignature<F> {
             synchronized (classCache) {
                 if (!classCache.containsKey(key)) {
                     LambdaClassGenerator<F> lambdaGen = new LambdaClassGenerator<F>(this);
-                    lambdaGen.generateClass(code, vals);
+                    lambdaGen.generateClass(code, vals, key);
                     classCache.put(key, lambdaGen);
                     return lambdaGen;
                 }
