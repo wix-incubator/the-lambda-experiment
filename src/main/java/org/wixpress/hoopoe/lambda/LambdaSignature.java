@@ -55,9 +55,18 @@ public class LambdaSignature<F> {
     }
 
     private LambdaClassGenerator generateClass(String code, Val[] vals) {
-        LambdaClassGenerator<F> lambdaGen = new LambdaClassGenerator<F>(this);
-        lambdaGen.generateClass(code, vals);
-        return lambdaGen;
+        LambdaClassKey key = new LambdaClassKey(retType, vars, vals, code);
+        if (!classCache.containsKey(key)) {
+            synchronized (classCache) {
+                if (!classCache.containsKey(key)) {
+                    LambdaClassGenerator<F> lambdaGen = new LambdaClassGenerator<F>(this);
+                    lambdaGen.generateClass(code, vals);
+                    classCache.put(key, lambdaGen);
+                    return lambdaGen;
+                }
+            }
+        }
+        return classCache.get(key);
     }
 
 }

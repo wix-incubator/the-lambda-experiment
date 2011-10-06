@@ -21,7 +21,7 @@ public class LambdaClassKey {
             this.names[i] = vars[i].getName();
             this.types[i] = vars[i].boxedType();
         }
-        for (int i=vars.length; i < vars.length + vals.length; i++) {
+        for (int i=0; i < vals.length; i++) {
             this.names[vars.length+i] = vals[i].getName();
             this.types[vars.length+i] = vals[i].boxedType();
         }
