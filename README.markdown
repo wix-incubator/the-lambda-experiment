@@ -95,6 +95,7 @@ Lambda(Integer.class, var(Integer.class), var(Integer.class)).build("a+b+c", val
 ```
 
 will generate the following class
+
 ```java
 class Lambda$$1340129336 implements org.wixpress.hoopoe.lambda.Function2 {
 	int c;
