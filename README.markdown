@@ -9,10 +9,12 @@ It is built as a prof of concept and as such, some features were not completed.
 ## What The Lambda Experiment does
 
 The Lambda Experiment project enables writing functional style code in Java. We have implemented three examples of the List map operation
+
 ```java
 aList.map(Integer.class, "a*a");
 aList.mapTo(Integer.class).with("a*a");
 aList.map(Lambda(Integer.class, var(Integer.class)).build("a*a"));
 ```
+
 All three perform the same operation - returns a new list of integers with the square of each element of the original list.
 
