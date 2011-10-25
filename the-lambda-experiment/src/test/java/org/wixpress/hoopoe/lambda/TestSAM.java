@@ -66,6 +66,16 @@ public class TestSAM {
         assertThat(aList.get(4), is(5));
     }
 
+    public interface Transform<A, B> {
+        B apply(A a);
+    }
+
+    @Test
+    public void testSAMWithGenericReturnParameter() {
+        Transform<Integer, Integer> f4 = Lambda(Transform.class, Integer.class, Integer.class).build("a*a");
+        assertThat(f4.apply(2), is(4));
+    }
+
     private <V> List<V> buildList(Class<V> itemType, V ... values) {
         List<V> aList = new ArrayList<V>();
         aList.addAll(Arrays.asList(values));

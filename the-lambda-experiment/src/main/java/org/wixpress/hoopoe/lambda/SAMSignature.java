@@ -99,7 +99,16 @@ public class SAMSignature<SAM> {
             lambdaApplyParameters[i] = Object.class;
         }
 
-        this.lambdaSignature = new LambdaSignature<Object>(samMethod.getReturnType(), vars);
+        Class<?> materializedRetType;
+        Type genericRetType = samMethod.getGenericReturnType();
+        if (genericRetType instanceof Class<?>)
+            materializedRetType = samMethod.getReturnType();
+        else if (genericRetType instanceof TypeVariable)
+            materializedRetType = findMaterializedType(((TypeVariable) genericRetType).getName());
+        else
+            throw new LambdaException("unexpected generic return type [%s] for SAM [%s]", samMethod.getReturnType(), samType.getName());
+
+        this.lambdaSignature = new LambdaSignature<Object>(materializedRetType, vars);
     }
 
     private Class findMaterializedType(String name) {
