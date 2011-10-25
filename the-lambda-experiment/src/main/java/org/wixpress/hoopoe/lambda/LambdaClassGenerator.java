@@ -65,6 +65,8 @@ class LambdaClassGenerator<F> {
             throw new LambdaException("failed creating Lambda - \n" + toString(), e);
         } catch (NoSuchMethodException e) {
             throw new LambdaException("failed creating Lambda - \n" + toString(), e);
+        } catch (VerifyError e) {
+            throw new LambdaException("failed compiling Lambda - \n%s\n" + toString(), e, e.getMessage());
         }
     }
 
@@ -196,7 +198,8 @@ class LambdaClassGenerator<F> {
         StringBuilder sb = new StringBuilder().append("class ").append(lambdaName).append(" implements ").append(functionInterface.getName()).append(" {\n");
         for (String fieldCode: fieldsCode)
             sb.append("\t").append(fieldCode).append("\n");
-        sb.append(constructorCode).append("\n");
+        if (constructorCode != null)
+            sb.append(constructorCode).append("\n");
         sb.append(invokeCode).append("\n");
         sb.append(invokeInternalCode).append("\n");
         sb.append(retTypeCode).append("\n");
