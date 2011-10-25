@@ -24,6 +24,18 @@ public class TestLambda {
     }
 
     @Test
+    public void testLambdaWithString() {
+        Function1<String, String> f = Lambda(String.class, var(String.class, "y")).build("y + \"abc\"");
+        assertThat(f.apply("xxx"), is("xxxabc"));
+    }
+
+    @Test
+    public void testLambdaReturningBoolean() {
+        Function1<Boolean, String> f = Lambda(Boolean.class, var(String.class, "y")).build("y.equals(\"abc\")");
+        assertThat(f.apply("abc"), is(true));
+    }
+
+    @Test
     public void testLambdaWithBind() {
         Function2<Integer, Integer, Integer> f = Lambda(Integer.class, var(Integer.class, "x"), var(Integer.class, "y")).build("x+y+z", val("z", 12));
         assertThat(f.apply(1, 2), is(15));

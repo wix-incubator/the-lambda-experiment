@@ -35,7 +35,7 @@ public class FuncVariable {
     }
 
     public String unboxCode(String block) {
-        return hasBoxing?String.format(boxedPair.unboxCode, block):block;
+        return hasBoxing?String.format(boxedPair.unboxCode, block):String.format("(%s)%s", type.getName(), block);
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
